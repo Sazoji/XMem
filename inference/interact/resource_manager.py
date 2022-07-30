@@ -73,12 +73,14 @@ class ResourceManager:
         # create workspace subdirectories
         self.image_dir = path.join(self.workspace, 'images')
         self.mask_dir = path.join(self.workspace, 'masks')
+        self.layer_dir = path.join(self.workspace, 'layer')
         os.makedirs(self.image_dir, exist_ok=True)
         os.makedirs(self.mask_dir, exist_ok=True)
 
         # convert read functions to be buffered
         self.get_image = LRU(self._get_image_unbuffered, maxsize=config['buffer_size'])
         self.get_mask = LRU(self._get_mask_unbuffered, maxsize=config['buffer_size'])
+        self.get_layer = LRU(self._get_layer_unbuffered, maxsize=config['buffer_size'])
 
         # extract frames from video
         if need_decoding:
@@ -179,6 +181,17 @@ class ResourceManager:
             return mask
         else:
             return None
+    def _get_layer_unbuffered(self, ti):
+        # returns H*W*4 uint8 array
+        assert 0 <= ti < self.length
+
+        try: 
+            layer = Image.open(path.join(self.layer_dir, self.names[ti]+'.jpg'))
+            layer.putalpha(255)
+            layer = np.array(layer)
+        except: 
+            layer = None
+        return layer
 
     def read_external_image(self, file_name, size=None):
         image = Image.open(file_name)

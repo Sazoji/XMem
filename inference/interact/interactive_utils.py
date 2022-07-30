@@ -104,7 +104,7 @@ def overlay_layer(image, mask, layer, target_object):
     layer_rgb = layer[:, :, :3]
     background_alpha = np.maximum(obj_mask, layer_alpha)[:,:,np.newaxis]
     obj_mask = obj_mask[:,:,np.newaxis]
-    im_overlay = (image*(1-background_alpha) + layer_rgb*(1-obj_mask) + image*obj_mask).clip(0, 255)
+    im_overlay = (layer_rgb*(1-background_alpha) + image*(1-obj_mask) + layer_rgb*obj_mask).clip(0, 255)
     return im_overlay.astype(image.dtype)
 
 def overlay_davis_torch(image, mask, alpha=0.5, fade=False):
@@ -167,7 +167,7 @@ def overlay_layer_torch(image, mask, layer, target_object):
     layer_rgb = layer[:, :, :3]
     background_alpha = torch.maximum(obj_mask, layer_alpha).unsqueeze(2)
     obj_mask = obj_mask.unsqueeze(2)
-    im_overlay = (image*(1-background_alpha) + layer_rgb*(1-obj_mask) + image*obj_mask).clip(0, 1)
+    im_overlay = (layer_rgb*(1-background_alpha) + image*(1-obj_mask) + layer_rgb*obj_mask).clip(0, 1)
 
     im_overlay = (im_overlay*255).cpu().numpy()
     im_overlay = im_overlay.astype(np.uint8)

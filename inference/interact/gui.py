@@ -381,6 +381,11 @@ class App(QWidget):
 
         if not no_mask:
             loaded_mask = self.res_man.get_mask(self.cursur)
+            try: 
+                test = self.res_man.get_layer(self.cursur)
+                if test is not None:
+                    self.overlay_layer = test
+            except:pass
             if loaded_mask is None:
                 self.current_mask.fill(0)
             else:
@@ -393,6 +398,12 @@ class App(QWidget):
 
         if self.current_prob is None and not no_mask:
             self.current_prob = index_numpy_to_one_hot_torch(self.current_mask, self.num_objects+1).cuda()
+        
+        try: 
+            test = self.res_man.get_layer(self.cursur)
+            if test is not None:
+                self.overlay_layer_torch = torch.from_numpy(test).float().cuda()/255
+        except:pass
 
     def compose_current_im(self):
         self.viz = get_visualization(self.viz_mode, self.current_image, self.current_mask, 
